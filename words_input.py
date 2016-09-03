@@ -1,16 +1,22 @@
-from os import listdir
+import os
 
 class WordsSourse:
 
     def __init__(self, start_path):
         self.path = start_path
-        self.files = sorted(listdir(start_path), key = lambda str: (len(str), str.lower()))
+
+        list_files = []
+        for dirpath, dnames, fnames in os.walk(start_path):
+            for f in fnames:
+                list_files.append(os.path.join(dirpath, f))
+
+        self.files = sorted(list_files, key = lambda str: (len(str), str.lower()))
 
     def get_from_interactive(self):
         files = self.files
 
         if len(files) == 1:
-            return [self.path + files[0]]
+            return [files[0]]
 
         print("\n\033[1mSELECT ONE OF THE FILES BELOW:\033[0m\n")
 
@@ -43,7 +49,7 @@ class WordsSourse:
         return num_in_array in range(len(self.files))
 
     def handle_file_input(self, num_in_array):
-        return self.path + self.files[num_in_array]
+        return self.files[num_in_array]
 
 def get_files(directory):
     return WordsSourse(directory).get_from_interactive()

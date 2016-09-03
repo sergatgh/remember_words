@@ -98,7 +98,7 @@ def get_repository_from_files(files):
 
 
 def get_repository_from_file(file):
-    ext = os.path.splitext(file)[1]
+    ext = os.path.splitext(file)[-1]
 
     if ext == ".json":
         return JsonRepository(file)
