@@ -1,6 +1,8 @@
+from urllib.request import urlopen
 import json
 import os.path
 import random
+from bs4 import BeautifulSoup
 
 class BaseRepository:
     def get_words(self):
@@ -15,26 +17,54 @@ class BaseRepository:
     def get_meanings(self, word):
         return []
 
-class TextRepository(BaseRepository):
-    def __init__(self, file):
-        self.file_name = file
-
+class FileRepository(BaseRepository):
     def file_exist(self):
         return os.path.isfile(self.file_name)
+
+class TextRepository(FileRepository):
+    def __init__(self, file):
+        self.file_name = file
+        self.data = self.load_words()
+
+    def load_words(self):
+        return [line.rstrip().lower() for line in open(self.file_name)]
 
     def get_words(self):
         if not self.file_exist():
             return []
 
-        return [line.rstrip().lower() for line in open(self.file_name)]
+        return self.data
 
-class JsonRepository(BaseRepository):
+class McMillanRepository(TextRepository):
+    def get_examples(self, word):
+        return self.get_data(word, "p", "EXAMPLE")
+
+    def get_meanings(self, word):
+        return self.get_data(word, "span", "DEFINITION")
+
+    def get_data(self, word, tag, cls):
+        page = self.load_data(word)
+        result = self.parse_data(page, tag, cls)
+        return result
+
+    def load_data(self, word):
+        mcmillan_link = "http://www.macmillandictionary.com/dictionary/british/%s"
+        mcmillan_word = word.replace(" ", "-")
+        link = mcmillan_link % mcmillan_word
+        response = urlopen(link)
+        the_page = response.read()
+        response.close()
+        return the_page
+
+    def parse_data(self, the_page, tag, cls):
+        soup = BeautifulSoup(the_page)
+
+        return [i.getText() for i in soup.find_all(tag, class_=cls)]
+
+class JsonRepository(FileRepository):
     def __init__(self, file):
         self.file_name = file
         self.data = self.load_data()
-
-    def file_exist(self):
-        return os.path.isfile(self.file_name)
 
     def get_words(self):
         if not self.file_exist():
@@ -104,4 +134,4 @@ def get_repository_from_file(file):
         return JsonRepository(file)
 
     if ext == ".txt":
-        return TextRepository(file)
+        return  McMillanRepository(file)

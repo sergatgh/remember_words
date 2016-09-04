@@ -22,22 +22,31 @@ def show_answered(answered):
     print(Messages.ANSWERED_WORDS % ', '.join(answered))
 
 def show_word_usage_examples(examples, highlight):
+    if not examples:
+        return
+    
+    message = Messages.EXAMPLES_LEADING_TEXT
+    print(message)
+
     for example in examples:
-        show_word_usage_example(example, highlight)
+        show_word_usage_example(example, highlight, len(message) + 1)
 
 def show_word_meanings(meanings):
-    for meaning in meanings:
-        show_word_meaning(meaning)
+    message = Messages.MEANINGS_LEADING_TEXT
+    print(message)
 
-def show_word_meaning(meaning):
+    for meaning in meanings:
+        show_word_meaning(meaning, len(message) + 1)
+
+def show_word_meaning(meaning, leading_whitespaces=0):
     if meaning:
-        message = Messages.MEANING % meaning
+        message = leading_whitespaces * ' ' + Messages.MEANING % meaning
 
         print(message)
 
-def show_word_usage_example(example, highlight):
+def show_word_usage_example(example, highlight, leading_whitespaces=0):
     if example:
-        message = Messages.SEE_EXAMPLE % example
+        message = leading_whitespaces * ' ' + Messages.SEE_EXAMPLE % example
 
         if highlight:
             message = highlighter.highlight_with_to(message)
