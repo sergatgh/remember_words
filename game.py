@@ -43,13 +43,21 @@ class Game:
         self.list.remove(word)
         self.answered.append(word)
 
-        if self.show_examples:
-            output.show_word_usage_examples(self.repo.get_examples(word), self.highlight)
-
-        if self.show_meanings:
-            output.show_word_meanings(self.repo.get_meanings(word))
+        self.show_info(word)
 
         output.show_statistics({"last":len(self.list)})
+
+    def show_info(self, word):
+        info = self.repo.get_info(word)
+
+        if "link" in info:
+            print(info["link"])
+
+        if self.show_examples and "examples" in info:
+            output.show_word_usage_examples(info["examples"], self.highlight)
+
+        if self.show_meanings and "meanings" in info:
+            output.show_word_meanings(info["meanings"])
 
     def handle_wrong(self, word):
         print('-')
